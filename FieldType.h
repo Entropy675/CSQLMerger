@@ -12,7 +12,17 @@
 // we can basically add static_asserts that would occur during compile time via templating for this
 
 // Macro to define a field and automatically initialize the field's type and name
-#define Field(name, type) FieldType name(type, #name)
+#define FIELD(name, type) FieldType name(type, #name)
+
+// table struct factory/definition
+#define TABLE(name, f, ...) \
+    struct name { \
+        static const char* string = #name; \
+        static const FieldType* fields = f; /* array of FieldType */ \
+        __VA_ARGS__ \
+        /* Insert any additional static fields specified by the user */ \
+    };
+
 
 // Base structure for FieldType
 struct FieldType 
@@ -37,16 +47,6 @@ struct FieldType
         return result;
     }
 };
-
-
-#define TABLE(name, f, ...) \
-    struct name { \
-        static const char* string = #name; \
-        static const FieldType* fields = f; /* array of FieldType */ \
-        __VA_ARGS__ \
-        /* Insert any additional static fields specified by the user */ \
-    };
-
 
 // Table class template to instantiate and handle the SQL-like table operations
 template <typename T>
@@ -90,11 +90,11 @@ class Table
 /*
 // Example table definition using the TABLE macro
 TABLE(Movie,
-    [Field(title, TEXT),
-    Field(director, TEXT), 
-    Field(producer, TEXT),
-    Field(releaseDate, DATE),
-    Field(movieId, INTEGER | PRIMARY_KEY)]
+    [FIELD(title, TEXT),
+    FIELD(director, TEXT), 
+    FIELD(producer, TEXT),
+    FIELD(releaseDate, DATE),
+    FIELD(movieId, INTEGER | PRIMARY_KEY)]
     static int customMetadataField;  // Custom static field
 );
 
